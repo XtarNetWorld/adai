@@ -1,0 +1,475 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Mobile Emulator — Final</title>
+<style>
+  :root{
+    --bg:#071322; --panel:#0a1b24; --muted:#9fb7c4; --accent:#06b6d4; --text:#e6eef6;
+    --phone-border:#0b1220; --screen-bg:#f7f9fb;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial;background:linear-gradient(180deg,#031021,#071827);color:var(--text);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:18px}
+  header{width:100%;max-width:1100px;margin-bottom:12px;display:flex;align-items:center;gap:12px}
+  header h1{margin:0;font-size:18px}
+  .wrap{width:100%;max-width:1100px;display:flex;gap:16px}
+  .left{width:380px;background:var(--panel);border-radius:12px;padding:12px}
+  .right{flex:1;display:flex;align-items:center;justify-content:center}
+  .label{font-size:13px;color:var(--muted);margin-bottom:6px}
+  select,input,button,textarea{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--text);padding:8px;border-radius:8px}
+  button.primary{background:var(--accent);color:#012;border:none;padding:9px 12px;border-radius:10px;cursor:pointer}
+  .controls{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+  textarea.editor{width:100%;height:240px;border-radius:8px;padding:10px;background:#041827;color:var(--text);border:1px solid rgba(255,255,255,0.02);resize:vertical}
+  .small{font-size:13px;color:var(--muted)}
+  .phone-wrap{width:360px;height:780px;display:flex;align-items:center;justify-content:center;transform-origin:center}
+  /* phone frame */
+  .phone{
+    width:360px;height:780px;border-radius:46px;padding:14px;background:linear-gradient(180deg,#0b1620,#08121a);box-shadow:0 20px 60px rgba(2,6,23,0.6);position:relative;overflow:hidden;border:8px solid var(--phone-border);
+  }
+  /* notch and top bar */
+  .phone:before{content:'';position:absolute;left:50%;transform:translateX(-50%);top:8px;width:36%;height:28px;background:rgba(0,0,0,0.6);border-radius:14px}
+  .screen{
+    position:relative;background:var(--screen-bg);border-radius:20px;overflow:hidden;width:100%;height:100%;display:flex;flex-direction:column;
+  }
+  /* home bar */
+  .homebar{position:absolute;left:50%;transform:translateX(-50%);bottom:12px;width:90px;height:5px;background:rgba(0,0,0,0.15);border-radius:10px}
+  iframe{width:100%;height:100%;border:0;background:white;display:block}
+  .kbd-sheet{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(180deg,#f2f4f6,#e6eef6);box-shadow:0 -12px 30px rgba(2,6,23,0.12);padding:8px 10px;border-top-left-radius:14px;border-top-right-radius:14px;display:flex;flex-direction:column;gap:8px;transform:translateY(100%);transition:transform .22s ease}
+  .kbd-sheet.visible{transform:translateY(0%)}
+  .kbd-row{display:flex;gap:6px;justify-content:center}
+  .key{flex:0 0 34px;height:44px;border-radius:10px;background:#fff;border:1px solid rgba(0,0,0,0.06);display:flex;align-items:center;justify-content:center;color:#111;font-weight:600;user-select:none;cursor:pointer}
+  .key.wide{flex:0 0 120px;border-radius:12px}
+  .key.func{background:#e0e8ea}
+  .kbd-space{flex:1;min-width:100px}
+  .toolbar{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+  .status{font-size:13px;color:var(--muted);margin-top:8px}
+  .hint{font-size:12px;color:#7fa9b4;margin-top:8px}
+  .footer{margin-top:10px;font-size:12px;color:#7fa9b4}
+  .notice{background:#082128;padding:8px;border-radius:8px;margin-top:8px;color:#9fb7c4}
+  .device-controls{display:flex;gap:8px;align-items:center}
+  /* small responsive */
+  @media (max-width:980px){ .wrap{flex-direction:column} .left{width:100%} .phone-wrap{align-self:center} }
+</style>
+</head>
+<body>
+<header>
+  <h1>Mobile Emulator — Final (keyboard inside phone)</h1>
+  <div class="small">Load URL or paste HTML. For typing, prefer "Fetch & use srcdoc" or paste HTML into editor (works offline).</div>
+</header>
+
+<div class="wrap">
+  <div class="left">
+    <div class="label">Load website / page</div>
+    <div style="display:flex;gap:8px;">
+      <input id="urlInput" type="text" placeholder="https://example.com" style="flex:1" />
+      <button id="loadBtn" class="primary">Load</button>
+    </div>
+
+    <div class="label" style="margin-top:10px">Or paste HTML (guaranteed working keyboard)</div>
+    <textarea id="editor" class="editor"><!doctype html>
+<html>
+  <head><meta name="viewport" content="width=device-width,initial-scale=1"/><style>body{font-family:Inter,Arial;padding:16px;background:#fff}input,textarea{font-size:16px;padding:10px;border-radius:8px;border:1px solid #ddd;width:100%;box-sizing:border-box;margin-bottom:10px}button{padding:10px;border-radius:8px;background:#06b6d4;color:#012;border:none}</style></head>
+  <body>
+    <h3>Local Test Page</h3>
+    <p>Tap fields to show keyboard. This page is same-origin in the emulator so keyboard types into inputs.</p>
+    <input id="name" placeholder="Your name" />
+    <input id="email" placeholder="Email" />
+    <textarea id="note" placeholder="Write a long note..."></textarea>
+    <button onclick="alert('Submit: '+(document.getElementById('name').value||''))">Submit</button>
+  </body>
+</html></textarea>
+
+    <div class="controls" style="margin-top:8px;">
+      <button id="renderHtml" class="primary">Render HTML</button>
+      <button id="pasteSample">Sample</button>
+      <div style="margin-left:auto" class="device-controls">
+        <select id="deviceSelect" title="Device size">
+          <option value="360x780">Phone 360×780</option>
+          <option value="393x852">iPhone 15 Pro</option>
+          <option value="390x844">iPhone 14</option>
+          <option value="412x915">Large Phone</option>
+          <option value="768x1024">Tablet</option>
+        </select>
+        <select id="orient">
+          <option value="portrait">Portrait</option>
+          <option value="landscape">Landscape</option>
+        </select>
+        <input id="scale" type="range" min="0.45" max="1.05" step="0.01" value="0.9" />
+      </div>
+    </div>
+
+    <div class="hint">Notes: "Fetch & use srcdoc" tries to fetch the remote page and set it as srcdoc so the emulator can control it. If fetch fails (CORS), the iframe will load the URL directly but keyboard will be disabled for cross-origin pages.</div>
+    <div class="notice" id="fetchNotice">Status: ready</div>
+  </div>
+
+  <div class="right">
+    <div class="phone-wrap" id="phoneWrap" style="transform:scale(.9)">
+      <div class="phone" id="phone">
+        <div class="screen" id="screen">
+          <iframe id="frame" sandbox="allow-scripts allow-forms allow-same-origin"></iframe>
+          <div class="homebar" aria-hidden="true"></div>
+        </div>
+
+        <!-- keyboard sheet sits inside phone and slides up -->
+        <div class="kbd-sheet" id="kbdSheet" aria-hidden="true">
+          <div class="toolbar" style="justify-content:space-between">
+            <div class="small" id="kbdTitle">Keyboard</div>
+            <div style="display:flex;gap:8px">
+              <button id="kbdHide" class="small">Hide</button>
+              <button id="kbdClear" class="small">Clear</button>
+            </div>
+          </div>
+          <div id="row1" class="kbd-row"></div>
+          <div id="row2" class="kbd-row"></div>
+          <div id="row3" class="kbd-row"></div>
+          <div id="row4" class="kbd-row"></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">If a remote page is loaded cross-origin, the emulator can't inject keys. Paste HTML into the editor or host your page with permissive CORS to allow keyboard control.</div>
+
+<script>
+/* --------- Utilities & UI refs ---------- */
+const urlInput = document.getElementById('urlInput');
+const loadBtn = document.getElementById('loadBtn');
+const renderHtml = document.getElementById('renderHtml');
+const pasteSample = document.getElementById('pasteSample');
+const editor = document.getElementById('editor');
+const frame = document.getElementById('frame');
+const kbdSheet = document.getElementById('kbdSheet');
+const fetchNotice = document.getElementById('fetchNotice');
+const deviceSelect = document.getElementById('deviceSelect');
+const orient = document.getElementById('orient');
+const phoneWrap = document.getElementById('phoneWrap');
+const phone = document.getElementById('phone');
+const scale = document.getElementById('scale');
+const row1 = document.getElementById('row1'), row2 = document.getElementById('row2'), row3 = document.getElementById('row3'), row4 = document.getElementById('row4');
+const kbdHide = document.getElementById('kbdHide'), kbdClear = document.getElementById('kbdClear');
+let focusedEl = null; // element inside iframe we can type into
+let isSrcdocControlled = false; // true when iframe content is same-origin (srcdoc)
+let shift = false;
+let numeric = false;
+
+/* --------- Keyboard layout ---------- */
+const alphaRow1 = ['q','w','e','r','t','y','u','i','o','p'];
+const alphaRow2 = ['a','s','d','f','g','h','j','k','l'];
+const alphaRow3 = ['Shift','z','x','c','v','b','n','m','Back'];
+const bottomRow = ['123','@','#','Space','Enter','😊'];
+
+function makeKey(label){
+  const el = document.createElement('div');
+  el.className = 'key';
+  el.textContent = label === 'Space' ? '' : label; // space will be wide
+  el.dataset.key = label;
+  if(label === 'Space') el.classList.add('wide','kbd-space');
+  if(label === 'Back' || label === 'Shift' || label === 'Enter' || label === '123') el.classList.add('func');
+  el.addEventListener('click', onKey);
+  return el;
+}
+
+function renderKeyboardRows(){
+  row1.innerHTML=''; row2.innerHTML=''; row3.innerHTML=''; row4.innerHTML='';
+  alphaRow1.forEach(k=> row1.appendChild(makeKey(k)));
+  alphaRow2.forEach(k=> row2.appendChild(makeKey(k)));
+  alphaRow3.forEach(k=> row3.appendChild(makeKey(k)));
+  bottomRow.forEach(k=>{
+    const el = makeKey(k);
+    if(k === 'Space'){ el.style.flex = '1 1 auto'; el.style.minWidth = '140px'; el.style.height='52px'; el.style.borderRadius='12px'; el.style.background='#fff'; el.style.color='#111'; }
+    row4.appendChild(el);
+  });
+}
+renderKeyboardRows();
+
+/* --------- Device sizing ---------- */
+function applyDeviceSize(){
+  const [w,h] = deviceSelect.value.split('x').map(Number);
+  const isLandscape = orient.value === 'landscape';
+  const ww = isLandscape ? Math.max(w,h) : w;
+  const hh = isLandscape ? Math.min(w,h) : h;
+  phone.style.width = ww + 'px';
+  phone.style.height = hh + 'px';
+}
+deviceSelect.addEventListener('change', applyDeviceSize);
+orient.addEventListener('change', applyDeviceSize);
+scale.addEventListener('input', ()=> { phoneWrap.style.transform = `scale(${scale.value})`; });
+applyDeviceSize();
+
+/* --------- Load logic: fetch & fallback ---------- */
+async function loadUrl(){
+  const url = (urlInput.value || '').trim();
+  if(!url){ fetchNotice.textContent = 'Enter a URL or paste HTML and click Render HTML.'; return; }
+  fetchNotice.textContent = 'Trying to fetch page HTML (this allows keyboard control if CORS permits)...';
+  isSrcdocControlled = false;
+  try{
+    const resp = await fetch(url, {mode:'cors'});
+    if(!resp.ok) throw new Error('HTTP ' + resp.status);
+    const html = await resp.text();
+    // optionally rewrite <base> so relative assets load
+    const baseTag = `<base href="${escapeHtml(url)}">`;
+    const injected = html.replace(/<head([^>]*)>/i, `<head$1>${baseTag}`);
+    frame.srcdoc = injected;
+    fetchNotice.textContent = 'Loaded via fetch → srcdoc (keyboard enabled).';
+    isSrcdocControlled = true;
+    attachFrameHandlers();
+  }catch(err){
+    console.warn('Fetch failed or blocked by CORS:', err);
+    // fallback: load directly into iframe (cross-origin likely). keyboard will be disabled.
+    try{
+      frame.src = url;
+      fetchNotice.textContent = 'Loaded directly into iframe (cross-origin). Keyboard will be disabled for that page.';
+      isSrcdocControlled = false;
+      attachFrameHandlers(); // attach to detect that it's cross-origin
+    }catch(e){
+      fetchNotice.textContent = 'Failed to load URL: ' + String(e);
+    }
+  }
+}
+
+/* escape for base tag insertion */
+function escapeHtml(s){ return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+
+/* --------- Render HTML from editor (guaranteed same-origin) ---------- */
+function renderHtmlFromEditor(){
+  const html = editor.value;
+  frame.srcdoc = html;
+  fetchNotice.textContent = 'Rendered editor HTML (keyboard enabled).';
+  isSrcdocControlled = true;
+  attachFrameHandlers();
+}
+
+/* --------- Attach handlers inside iframe when same-origin ---------- */
+function attachFrameHandlers(){
+  // small delay to let content be available
+  setTimeout(()=>{
+    let doc;
+    try{
+      doc = frame.contentDocument;
+    }catch(e){
+      doc = null;
+    }
+    if(!doc){
+      // cross-origin or not ready
+      focusedEl = null;
+      hideKeyboard();
+      fetchNotice.textContent += ' (frame appears cross-origin — keyboard cannot be injected)';
+      return;
+    }
+    // attach listeners to manage focus & tapping
+    try{
+      // remove previous listeners if any by cloning? simple: attach new ones — they're small
+      doc.addEventListener('click', (ev) => {
+        const t = ev.target;
+        if(isEditable(t)){
+          focusedEl = t;
+          showKeyboard();
+          setCursorEnd(t);
+        } else {
+          // clicking outside editable element doesn't hide keyboard to mimic mobile behavior
+          // if you want auto-hide uncomment next line:
+          // focusedEl = null;
+        }
+      }, true);
+
+      doc.addEventListener('focusin', (ev)=>{
+        const t = ev.target;
+        if(isEditable(t)){
+          focusedEl = t;
+          showKeyboard();
+          setCursorEnd(t);
+        }
+      }, true);
+
+      doc.addEventListener('focusout', (ev)=>{
+        // do not auto hide
+      }, true);
+
+      fetchNotice.textContent += ' (same-origin frame ready)';
+    }catch(e){
+      console.warn('attachFrameHandlers error', e);
+      fetchNotice.textContent += ' (unable to attach handlers)';
+    }
+  }, 250);
+}
+
+/* detect editable */
+function isEditable(el){
+  if(!el) return false;
+  if(el.isContentEditable) return true;
+  const tag = el.tagName && el.tagName.toLowerCase();
+  return tag === 'input' || tag === 'textarea' || (tag === 'div' && el.getAttribute && el.getAttribute('contenteditable') === 'true');
+}
+
+/* --------- Keyboard behavior (inserts text into focusedEl) ---------- */
+function showKeyboard(){ kbdSheet.classList.add('visible'); kbdSheet.setAttribute('aria-hidden','false'); }
+function hideKeyboard(){ kbdSheet.classList.remove('visible'); kbdSheet.setAttribute('aria-hidden','true'); }
+
+function getValue(el){
+  const tag = el.tagName && el.tagName.toLowerCase();
+  if(tag === 'input' || tag === 'textarea') return el.value || '';
+  return el.innerText || '';
+}
+function setValue(el, v){
+  const tag = el.tagName && el.tagName.toLowerCase();
+  if(tag === 'input' || tag === 'textarea') el.value = v;
+  else el.innerText = v;
+  // dispatch input event
+  const ev = new Event('input', {bubbles:true, cancelable:true});
+  el.dispatchEvent(ev);
+  const ev2 = new Event('change', {bubbles:true, cancelable:true});
+  el.dispatchEvent(ev2);
+}
+
+function setCursorEnd(el){
+  try{
+    const tag = el.tagName && el.tagName.toLowerCase();
+    el.focus();
+    if(tag === 'input' || tag === 'textarea'){
+      const len = el.value.length;
+      el.setSelectionRange(len, len);
+    } else {
+      const doc = frame.contentDocument;
+      const range = doc.createRange();
+      range.selectNodeContents(el);
+      range.collapse(false);
+      const sel = frame.contentWindow.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }
+  }catch(e){}
+}
+
+function onKeyClick(ev){
+  const key = ev.currentTarget.dataset.key;
+  if(!focusedEl){
+    // if frame is cross-origin, try to forward key by focusing the iframe (can't type inside cross-origin)
+    // we show a friendly hint
+    fetchNotice.textContent = 'No editable field focused inside same-origin frame. Paste HTML or load via fetch to enable typing.';
+    return;
+  }
+  let val = getValue(focusedEl);
+  if(key === 'Back'){
+    val = val.slice(0, -1);
+  } else if(key === 'Space'){
+    val += ' ';
+  } else if(key === 'Enter'){
+    const tag = (focusedEl.tagName && focusedEl.tagName.toLowerCase()) || '';
+    if(tag === 'textarea' || focusedEl.isContentEditable) val += '\n';
+    else {
+      const form = focusedEl.form;
+      if(form){ try{ form.requestSubmit ? form.requestSubmit() : form.submit(); } catch(e){} }
+      focusedEl.blur();
+    }
+  } else if(key === 'Shift'){
+    shift = !shift;
+    updateShiftVisual();
+    return;
+  } else if(key === '123'){
+    toggleNumeric();
+    return;
+  } else {
+    const ch = shift ? key.toUpperCase() : key;
+    val += ch;
+    if(shift){ shift = false; updateShiftVisual(); }
+  }
+  setValue(focusedEl, val);
+  setCursorEnd(focusedEl);
+}
+
+function updateShiftVisual(){
+  Array.from(document.querySelectorAll('#row3 .key')).forEach(k=>{
+    if(k.dataset.key === 'Shift'){ k.style.background = shift ? '#dfeff0' : ''; k.style.color = shift ? '#111' : ''; }
+  });
+}
+
+/* attach click listeners to keys */
+function attachKeyHandlers(){
+  Array.from(document.querySelectorAll('.key')).forEach(k=>{
+    k.removeEventListener('click', onKeyClick);
+    k.addEventListener('click', onKeyClick);
+  });
+}
+attachKeyHandlers();
+
+/* numeric toggle */
+function toggleNumeric(){
+  numeric = !numeric;
+  if(numeric){
+    // replace row1..row3 with numeric keys
+    row1.innerHTML=''; row2.innerHTML=''; row3.innerHTML='';
+    const r1 = ['1','2','3','4','5','6','7','8','9','0'];
+    const r2 = ['-','/',':',';','(',')','$','&','@','"'];
+    const r3 = ['Shift','.','_','?',',','!','Back','ABC']; // ABC to go back
+    r1.forEach(k=>row1.appendChild(makeKeyEl(k)));
+    r2.forEach(k=>row2.appendChild(makeKeyEl(k)));
+    r3.forEach(k=>row3.appendChild(makeKeyEl(k)));
+    // ABC returns to letters
+    Array.from(row3.children).forEach(ch=>{
+      if(ch.dataset.key === 'ABC') ch.addEventListener('click', ()=> { numeric=false; renderKeyboardRows(); attachKeyHandlers(); });
+    });
+  } else {
+    renderKeyboardRows();
+    attachKeyHandlers();
+  }
+}
+
+function makeKeyEl(label){
+  const node = document.createElement('div');
+  node.className = 'key';
+  node.textContent = label === 'Space' ? '' : label;
+  node.dataset.key = label;
+  if(label === 'Space') node.classList.add('wide','kbd-space');
+  if(label === 'Back' || label === 'Shift' || label === 'Enter') node.classList.add('func');
+  node.addEventListener('click', onKeyClick);
+  return node;
+}
+
+/* re-render keyboard rows (restores alpha) */
+function renderKeyboardRows(){
+  row1.innerHTML=''; row2.innerHTML=''; row3.innerHTML=''; row4.innerHTML='';
+  alphaRow1.forEach(ch => row1.appendChild(makeKeyEl(ch)));
+  alphaRow2.forEach(ch => row2.appendChild(makeKeyEl(ch)));
+  alphaRow3.forEach(ch => row3.appendChild(makeKeyEl(ch)));
+  bottomRow.forEach(ch => {
+    const el = makeKeyEl(ch);
+    if(ch === 'Space'){ el.style.flex = '1 1 auto'; el.style.minWidth='140px'; el.style.height='52px'; el.style.borderRadius='12px'; el.style.background='#fff'; el.style.color='#111'; }
+    row4.appendChild(el);
+  });
+}
+renderKeyboardRows();
+attachKeyHandlers();
+
+/* kbd controls */
+kbdHide.addEventListener('click', ()=> hideKeyboard());
+kbdClear.addEventListener('click', ()=> {
+  if(focusedEl) setValue(focusedEl, '');
+});
+
+/* UI actions */
+loadBtn.addEventListener('click', loadUrl);
+renderHtml.addEventListener('click', renderHtmlFromEditor);
+pasteSample.addEventListener('click', ()=> { editor.value = editor.value; renderHtmlFromEditor(); });
+
+/* attachFrameHandlers when iframe loads (cover both src and srcdoc cases) */
+frame.addEventListener('load', ()=>{
+  // try to attach handlers if same-origin
+  attachFrameHandlers();
+});
+
+/* initial render of editor */
+renderHtmlFromEditor();
+
+/* helper: allow manual paste into input inside iframe (if cross-origin cannot focus) */
+function focusIframe() { try{ frame.contentWindow.focus(); }catch(e){} }
+
+/* small UX: clicking the screen focuses frame and toggles hint */
+phone.addEventListener('click', ()=> { try{ frame.contentWindow.focus(); }catch(e){} });
+
+/* end */
+</script>
+</body>
+</html>

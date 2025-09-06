@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AiCoP</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  
+    <link rel="stylesheet" href="chatstyle.css" />
+  <!-- Base styles that apply to both interfaces -->
+  <style>
+    /* Common styles for both interfaces */
+
+    
+    #network {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+    }
+    
+    .hidden {
+      display: none !important;
+    }
+  </style>
+  <!-- Dynamic CSS links will be added here by JavaScript -->
+</head>
+<body>
+  <!-- Floating Network Background -->
+  <canvas id="network"></canvas>
+
+  <!-- Call UI (initially hidden) -->
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="modal" id="fileModal">
+    <span class="close-modal">&times;</span>
+    <div class="modal-content" id="modalContent"></div>
+    <div class="modal-title" id="modalTitle"></div>
+  </div>
+
+
+  <!-- Delete message menu -->
+  <div class="delete-menu" id="deleteMenu">
+    <div class="delete-option delete-for-me" id="deleteForMe">
+      <i class="fas fa-user"></i>
+      <span>Delete</span>
+    </div>
+    <div  id="deleteForEveryone">
+      
+    
+    </div>
+  </div>
+  
+
+  <!-- Main Chat Container -->
+  <div class="app-container" id="appContainer">
+   <!-- Floating Navigation Header -->
+<!-- Floating Navigation Header -->
+<div class="chat-header">
+  <div class="header-left">
+    <div class="app-logo"><i class="fas fa-robot"></i></div>
+    <div class="app-name">AiCOP</div>
+  </div>
+  <div class="header-right">
+    <button class="icon-button" title="New Chat" onclick="startNewChat()"><i class="fas fa-plus"></i></button>
+    <button class="icon-button2" title="User Profile"><i class="fas fa-user"></i></button>
+  </div>
+</div>
+
+
+
+    <!-- Chat Scroll Container -->
+    <div class="chat-scroll-container">
+      <div class="chat-area" id="chatArea">
+        <!-- Example messages -->
+         
+        <div class="nothing"></div>
+        
+       
+      
+    </div>
+
+
+
+
+
+<div class="chat-area" id="chatArea"></div>
+
+  <div id="typingIndicator" class="typing-indicator" style="display: none;">
+    <span id="typingText"></span>
+    <div class="writer-circle">
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+    
+
+    <!-- Chat Input -->
+    <div class="chat-input-wrapper">
+      <div class="file-preview" id="filePreviewContainer"></div>
+      <textarea placeholder="Ask anything" rows="1" id="chatInput"></textarea>
+
+<div class="button-row">
+  <div class="left-buttons">
+    <button class="icon-btn" title="Attach" id="fileInputTrigger">
+      <i class="fa-solid fa-paperclip"></i>
+    </button>
+    <input type="file" id="fileInput" hidden multiple accept="doc/*,docx/*,xlx/*,xlsx/*,ppt/*,pptx/*,txt/*,zip/*,rar/*,mp3/*,mp4/*,wav/*,default/*,image/*,video/*,.pdf" />
+    <button class="think-btn"><i class="fa-regular fa-lightbulb"></i> Think</button>
+  </div>
+<div class="right-bottons">
+  <button class="icon-btn" title="Microphone" id="micBtn">
+      <i class="fa-solid fa-microphone"></i>
+    </button>
+  <button class="send-btn" title="Send" id="sendBtn">
+    <i class="fa-solid fa-paper-plane"></i>
+  </button>
+  </div>
+</div>
+    </div>
+  </div>
+
+
+
+
+
+
+  
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
+  <script src="king.js"></script>
+  <script src="background.js"></script>
+  
+<script>
+
+</script>
+</body>
+</html>
